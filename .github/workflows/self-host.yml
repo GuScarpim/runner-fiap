@@ -1,0 +1,19 @@
+name: Testar Runner Auto-Hospedado
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - name: Exibir informações no Linux
+        if: runner.os == 'Linux'
+        run: uname -a
+
+      - name: Exibir informações no macOS
+        if: runner.os == 'macOS'
+        run: uname -a
+
+      - name: Exibir informações no Windows
+        if: runner.os == 'Windows'
+        run: systeminfo
