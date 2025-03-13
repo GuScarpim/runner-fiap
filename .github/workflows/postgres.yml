@@ -1,0 +1,39 @@
+name: Access Local Database
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  query-database:
+    runs-on: self-hosted  # Usa um runner dentro da rede
+    steps:
+      - name: Checkout do Código
+        uses: actions/checkout@v4
+
+      - name: Verificar Instalação do PostgreSQL Client
+        shell: powershell
+        run: |
+          $pg_exists = Get-Command "C:\Program Files\PostgreSQL\17\bin\psql.exe" -ErrorAction SilentlyContinue
+          if (-not $pg_exists) {
+            Write-Host "PostgreSQL Client não encontrado. Instale manualmente."
+            exit 1
+          }
+
+      - name: Executar Query no Banco Local
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: postgres
+        shell: powershell
+        run: |
+          $env:PGPASSWORD="${{ secrets.DB_PASS }}"
+          & "C:\Program Files\PostgreSQL\17\bin\psql.exe" `
+            -h $env:DB_HOST `
+            -p $env:DB_PORT `
+            -U $env:DB_USER `
+            -d $env:DB_NAME `
+            -c "SELECT * FROM users LIMIT 5;"
